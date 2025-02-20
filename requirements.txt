@@ -1,0 +1,4 @@
+python-telegram-bot==21.10
+anthropic==0.43.0
+python-dotenv
+grobid-client-python==0.0.9
