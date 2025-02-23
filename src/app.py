@@ -1,3 +1,5 @@
+# flake8: noqa: E501
+
 import datetime
 import os
 import re
@@ -42,6 +44,16 @@ grobid_client = GrobidClient(
 
 
 def access_control(func):
+    """
+    Decorator function that restricts access to certain users.
+
+    Args:
+        func (function): The function to be wrapped and restricted.
+
+    Returns:
+        function: The wrapped function that enforces access control.
+    """
+
     @wraps(func)
     async def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
         user_id = str(update.message.from_user.username)
@@ -56,10 +68,30 @@ def access_control(func):
 
 
 def get_prompt(question, article_content):
-    return f"O usuário fez a seguinte pergunta baseada no artigo:\n\n'{question}'\n\nTexto extraído do artigo:\n\n{article_content}\n\nResponda de forma objetiva, em português (PT-BR) e limite-se a 850 tokens."  # noqa: E501
+    """
+    Generates a formatted prompt for an objective response based on a question and article content.
+
+    Args:
+        question (str): The question asked by the user.
+        article_content (str): The content extracted from the article.
+
+    Returns:
+        str: The formatted string containing the question and article content.
+    """
+    return f"O usuário fez a seguinte pergunta baseada no artigo:\n\n'{question}'\n\nTexto extraído do artigo:\n\n{article_content}\n\nResponda de forma objetiva, em português (PT-BR) e limite-se a 850 tokens."
 
 
 async def generate_response(update: Update, prompt):
+    """
+    Generates a response using the Claude 3.5 Haiku model based on the provided prompt.
+
+    Args:
+        update (Update): The update object representing the incoming message and its context.
+        prompt (str): The prompt to be sent to the Claude model to generate a response.
+
+    Returns:
+        str: The text content of the generated response.
+    """
     await update.message.reply_text("⏳ Claude 3.5 Haiku: gerando resposta...")
 
     try:
@@ -77,8 +109,18 @@ async def generate_response(update: Update, prompt):
 
 
 async def generate_summary(update: Update, context: CallbackContext):
+    """
+    Generates a summary of an article based on predefined topics and sends it to the user.
+
+    Args:
+        update (Update): The update object representing the incoming message and its context.
+        context (CallbackContext): The context object containing user-specific data, including the article content.
+
+    Returns:
+        None
+    """
     article_content = context.user_data.get("article")
-    question = """Responda aos seguintes tópicos: Título ('Título'), Data de publicação ('Data de publicação'), Autores ('Autores'), Resumo em um tweet ('Resumo em um tweet'), Panorama ('Panorama') e Principais achados ('Principais achados'). A resposta deve estar em português (PT-BR), baseada no artigo e com um máximo de 850 tokens."""  # noqa: E501
+    question = """Responda aos seguintes tópicos: Título ('Título'), Data de publicação ('Data de publicação'), Autores ('Autores'), Resumo em um tweet ('Resumo em um tweet'), Panorama ('Panorama') e Principais achados ('Principais achados'). A resposta deve estar em português (PT-BR), baseada no artigo e com um máximo de 850 tokens."""
 
     if not article_content:
         await update.message.reply_text(
@@ -98,6 +140,16 @@ async def generate_summary(update: Update, context: CallbackContext):
 
 
 async def suporte(update: Update, context: CallbackContext):
+    """
+    Sends a help message providing information about the article summarization tool and its usage.
+
+    Args:
+        update (Update): The update object representing the incoming message and its context.
+        context (CallbackContext): The context object containing user-specific data, which is not used in this function.
+
+    Returns:
+        None
+    """
     await update.message.reply_text(
         """Ferramenta experimental para gerar resumos de artigos científicos diretamente de arquivos PDF\. Foi desenvolvida para auxiliar no processo de curadoria da newsletter Periódica\.
 
@@ -116,12 +168,22 @@ author: Clarissa Mendes \<support@claromes\.com\>
 version: 0\.0\.2\-alpha
 license:
 source code: [github\.com/periodicanews/resumo\-periodico](https://github\.com/periodicanews/resumo\-periodico)
-""",  # noqa: E501
+""",
         parse_mode="MarkdownV2",
     )
 
 
 async def start(update: Update, context: CallbackContext):
+    """
+    Sends a welcome message to the user with instructions to send an article and ask questions.
+
+    Args:
+        update (Update): The update object representing the incoming message and its context.
+        context (CallbackContext): The context object containing user-specific data, which is not used in this function.
+
+    Returns:
+        None
+    """
     await update.message.reply_text(
         """Envie seu artigo científico, aguarde a análise e faça suas perguntas.
 
@@ -130,6 +192,16 @@ Digite /suporte para obter ajuda."""
 
 
 async def handle_pdf(update: Update, context: CallbackContext):
+    """
+    Processes a PDF document sent by the user and extracts its content using the GROBID service.
+
+    Args:
+        update (Update): The update object representing the incoming message and its context.
+        context (CallbackContext): The context object containing user-specific data, including the article content.
+
+    Returns:
+        None
+    """
     document: Document = update.message.document
 
     date_now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -173,6 +245,16 @@ async def handle_pdf(update: Update, context: CallbackContext):
 
 
 async def handle_text(update: Update, context: CallbackContext):
+    """
+    Handles a user's text input, generates a response based on the article content, and sends it back to the user.
+
+    Args:
+        update (Update): The update object representing the incoming message and its context.
+        context (CallbackContext): The context object containing user-specific data, including the article content.
+
+    Returns:
+        None
+    """
     user_message = update.message.text
     article_content = context.user_data.get("article")
 
