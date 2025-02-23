@@ -4,6 +4,7 @@ import datetime
 import os
 import re
 from functools import wraps
+from typing import Any, Awaitable, Callable, Optional
 
 import anthropic
 from dotenv import load_dotenv
@@ -43,7 +44,9 @@ grobid_client = GrobidClient(
 )
 
 
-def access_control(func):
+def access_control(
+    func: Callable[..., Awaitable[Any]],
+) -> Callable[..., Awaitable[Any]]:
     """
     Decorator function that restricts access to certain users.
 
@@ -55,8 +58,10 @@ def access_control(func):
     """
 
     @wraps(func)
-    async def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
-        user_id = str(update.message.from_user.username)
+    async def wrapped(
+        update: Update, context: CallbackContext, *args: Any, **kwargs: Any
+    ) -> Any:
+        user_id: Optional[str] = update.message.from_user.username
         if user_id not in ALLOWED_USERS:
             await update.message.reply_text(
                 "Acesso negado. Você não tem permissão para usar este bot."
@@ -67,7 +72,7 @@ def access_control(func):
     return wrapped
 
 
-def get_prompt(question, article_content):
+def get_prompt(question: str, article_content: str) -> str:
     """
     Generates a formatted prompt for an objective response based on a question and article content.
 
@@ -81,7 +86,7 @@ def get_prompt(question, article_content):
     return f"O usuário fez a seguinte pergunta baseada no artigo:\n\n'{question}'\n\nTexto extraído do artigo:\n\n{article_content}\n\nResponda de forma objetiva, em português (PT-BR) e limite-se a 850 tokens."
 
 
-async def generate_response(update: Update, prompt):
+async def generate_response(update: Update, prompt: str) -> str:
     """
     Generates a response using the Claude 3.5 Haiku model based on the provided prompt.
 
@@ -92,7 +97,7 @@ async def generate_response(update: Update, prompt):
     Returns:
         str: The text content of the generated response.
     """
-    await update.message.reply_text("⏳ Claude 3.5 Haiku: gerando resposta...")
+    await update.message.reply_text("⏳ Claude 3.5 Haiku: gerando resposta... (≤1 min)")
 
     try:
         response = anthropic_client.messages.create(
@@ -106,9 +111,10 @@ async def generate_response(update: Update, prompt):
         return response.content[0].text
     except Exception as e:
         await update.message.reply_text(f"Claude 3.5 Haiku: {e}")
+        return str(e)
 
 
-async def generate_summary(update: Update, context: CallbackContext):
+async def generate_summary(update: Update, context: CallbackContext) -> None:
     """
     Generates a summary of an article based on predefined topics and sends it to the user.
 
@@ -119,8 +125,10 @@ async def generate_summary(update: Update, context: CallbackContext):
     Returns:
         None
     """
-    article_content = context.user_data.get("article")
-    question = """Responda aos seguintes tópicos: Título ('Título'), Data de publicação ('Data de publicação'), Autores ('Autores'), Resumo em um tweet ('Resumo em um tweet'), Panorama ('Panorama') e Principais achados ('Principais achados'). A resposta deve estar em português (PT-BR), baseada no artigo e com um máximo de 850 tokens."""
+    article_content: Optional[str] = context.user_data.get("article")
+    question: str = (
+        """Responda aos seguintes tópicos: Título ('Título'), Data de publicação ('Data de publicação'), Autores ('Autores'), Resumo em um tweet ('Resumo em um tweet'), Panorama ('Panorama') e Principais achados ('Principais achados'). A resposta deve estar em português (PT-BR), baseada no artigo e com um máximo de 850 tokens."""
+    )
 
     if not article_content:
         await update.message.reply_text(
@@ -128,10 +136,12 @@ async def generate_summary(update: Update, context: CallbackContext):
         )
         return
 
-    prompt = get_prompt(question, article_content)
+    prompt: str = get_prompt(question, article_content)
 
-    summary_text = await generate_response(update, prompt)
-    summary_text_clean = re.sub(r"<\?xml.*?</TEI>", "", summary_text, flags=re.DOTALL)
+    summary_text: str = await generate_response(update, prompt)
+    summary_text_clean: str = re.sub(
+        r"<\?xml.*?</TEI>", "", summary_text, flags=re.DOTALL
+    )
 
     context.user_data["summary"] = summary_text_clean
 
@@ -139,7 +149,7 @@ async def generate_summary(update: Update, context: CallbackContext):
     await update.message.reply_text("Se preferir, pergunte algo sobre o artigo.")
 
 
-async def suporte(update: Update, context: CallbackContext):
+async def suporte(update: Update, context: CallbackContext) -> None:
     """
     Sends a help message providing information about the article summarization tool and its usage.
 
@@ -173,7 +183,7 @@ source code: [github\.com/periodicanews/resumo\-periodico](https://github\.com/p
     )
 
 
-async def start(update: Update, context: CallbackContext):
+async def start(update: Update, context: CallbackContext) -> None:
     """
     Sends a welcome message to the user with instructions to send an article and ask questions.
 
@@ -191,7 +201,7 @@ Digite /suporte para obter ajuda."""
     )
 
 
-async def handle_pdf(update: Update, context: CallbackContext):
+async def handle_pdf(update: Update, context: CallbackContext) -> None:
     """
     Processes a PDF document sent by the user and extracts its content using the GROBID service.
 
@@ -204,15 +214,15 @@ async def handle_pdf(update: Update, context: CallbackContext):
     """
     document: Document = update.message.document
 
-    date_now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    input_path = f"resources/input_{date_now}/"
+    date_now: str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    input_path: str = f"resources/input_{date_now}/"
     os.makedirs(input_path, exist_ok=True)
-    pdf_path = os.path.join(input_path, document.file_name)
+    pdf_path: str = os.path.join(input_path, document.file_name)
 
     file = await context.bot.get_file(document.file_id)
     await file.download_to_drive(pdf_path)
 
-    await update.message.reply_text("⏳ GROBID: processando...")
+    await update.message.reply_text("⏳ GROBID: processando... (≤1 min)")
 
     grobid_client.process(
         "processFulltextDocument",
@@ -225,8 +235,8 @@ async def handle_pdf(update: Update, context: CallbackContext):
 
     await update.message.chat.send_action(action="typing")
 
-    xml_name = document.file_name.replace(".pdf", ".grobid.tei.xml")
-    tei_file_path = os.path.join(input_path, xml_name)
+    xml_name: str = document.file_name.replace(".pdf", ".grobid.tei.xml")
+    tei_file_path: str = os.path.join(input_path, xml_name)
 
     if not os.path.exists(tei_file_path):
         await update.message.reply_text(
@@ -235,7 +245,7 @@ async def handle_pdf(update: Update, context: CallbackContext):
         return
 
     with open(tei_file_path, "r") as tei_file:
-        article_content = tei_file.read()
+        article_content: str = tei_file.read()
 
     context.user_data["article"] = article_content
 
@@ -244,7 +254,7 @@ async def handle_pdf(update: Update, context: CallbackContext):
     )
 
 
-async def handle_text(update: Update, context: CallbackContext):
+async def handle_text(update: Update, context: CallbackContext) -> None:
     """
     Handles a user's text input, generates a response based on the article content, and sends it back to the user.
 
@@ -255,15 +265,15 @@ async def handle_text(update: Update, context: CallbackContext):
     Returns:
         None
     """
-    user_message = update.message.text
-    article_content = context.user_data.get("article")
+    user_message: str = update.message.text
+    article_content: Optional[str] = context.user_data.get("article")
 
     if not article_content:
         await update.message.reply_text("Envie um artigo para análise.")
         return
 
-    prompt = get_prompt(user_message, article_content)
-    answer = await generate_response(update, prompt)
+    prompt: str = get_prompt(user_message, article_content)
+    answer: str = await generate_response(update, prompt)
 
     await update.message.reply_text(answer)
 
