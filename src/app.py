@@ -43,7 +43,7 @@ def get_prompt(question, article_content):
 
 
 async def generate_response(update: Update, prompt):
-    await update.message.chat.send_action(action="typing")
+    await update.message.reply_text("⏳ Claude 3.5 Haiku: gerando resposta...")
 
     try:
         response = anthropic_client.messages.create(
@@ -52,9 +52,32 @@ async def generate_response(update: Update, prompt):
             messages=[{"role": "user", "content": prompt}],
         )
 
+        await update.message.chat.send_action(action="typing")
+
         return response.content[0].text
     except Exception as e:
         await update.message.reply_text(f"Claude 3.5 Haiku: {e}")
+
+
+async def generate_summary(update: Update, context: CallbackContext):
+    article_content = context.user_data.get("article")
+    question = """Responda aos seguintes tópicos: Título ('Título'), Data de publicação ('Data de publicação'), Autores ('Autores'), Resumo em um tweet ('Resumo em um tweet'), Panorama ('Panorama') e Principais achados ('Principais achados'). A resposta deve estar em português (PT-BR), baseada no artigo e com um máximo de 850 tokens."""
+
+    if not article_content:
+        await update.message.reply_text(
+            "Nenhum artigo foi enviado ainda. Envie um PDF para análise."
+        )
+        return
+
+    prompt = get_prompt(question, article_content)
+
+    summary_text = await generate_response(update, prompt)
+    summary_text_clean = re.sub(r"<\?xml.*?</TEI>", "", summary_text, flags=re.DOTALL)
+
+    context.user_data["summary"] = summary_text_clean
+
+    await update.message.reply_text(f"Resumo:\n\n{summary_text_clean}")
+    await update.message.reply_text("Se preferir, pergunte algo sobre o artigo.")
 
 
 async def suporte(update: Update, context: CallbackContext):
@@ -99,7 +122,8 @@ async def handle_pdf(update: Update, context: CallbackContext):
 
     file = await context.bot.get_file(document.file_id)
     await file.download_to_drive(pdf_path)
-    await update.message.chat.send_action(action="typing")
+
+    await update.message.reply_text("⏳ GROBID: processando...")
 
     grobid_client.process(
         "processFulltextDocument",
@@ -109,6 +133,8 @@ async def handle_pdf(update: Update, context: CallbackContext):
         force=True,
         verbose=True,
     )
+
+    await update.message.chat.send_action(action="typing")
 
     xml_name = document.file_name.replace(".pdf", ".grobid.tei.xml")
     tei_file_path = os.path.join(input_path, xml_name)
