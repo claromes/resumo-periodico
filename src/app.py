@@ -12,11 +12,13 @@ from telegram.ext import (
     filters,
     CallbackContext,
 )
+from functools import wraps
 
 load_dotenv()
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+ALLOWED_USERS = os.getenv("ALLOWED_USERS")
 
 anthropic_client = anthropic.Client(api_key=ANTHROPIC_API_KEY)
 
@@ -36,6 +38,20 @@ grobid_client = GrobidClient(
     sleep_time=5,
     timeout=60,
 )
+
+
+def access_control(func):
+    @wraps(func)
+    async def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
+        user_id = str(update.message.from_user.username)
+        if user_id not in ALLOWED_USERS:
+            await update.message.reply_text(
+                "Acesso negado. Você não tem permissão para usar este bot."
+            )
+            return
+        return await func(update, context, *args, **kwargs)
+
+    return wrapped
 
 
 def get_prompt(question, article_content):
@@ -191,10 +207,12 @@ async def handle_text(update: Update, context: CallbackContext):
 
 
 app = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("resumo", generate_summary))
-app.add_handler(CommandHandler("suporte", suporte))
-app.add_handler(MessageHandler(filters.Document.PDF, handle_pdf))
-app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
+app.add_handler(CommandHandler("start", access_control(start)))
+app.add_handler(CommandHandler("resumo", access_control(generate_summary)))
+app.add_handler(CommandHandler("suporte", access_control(suporte)))
+app.add_handler(MessageHandler(filters.Document.PDF, access_control(handle_pdf)))
+app.add_handler(
+    MessageHandler(filters.TEXT & ~filters.COMMAND, access_control(handle_text))
+)
 
 app.run_polling()
