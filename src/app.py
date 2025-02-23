@@ -24,25 +24,6 @@ ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 ALLOWED_USERS = os.getenv("ALLOWED_USERS")
 
-anthropic_client = anthropic.Client(api_key=ANTHROPIC_API_KEY)
-
-grobid_client = GrobidClient(
-    grobid_server="http://localhost:8070",
-    batch_size=100,
-    coordinates=[
-        "persName",
-        "figure",
-        "ref",
-        "biblStruct",
-        "formula",
-        "s",
-        "note",
-        "title",
-    ],
-    sleep_time=5,
-    timeout=60,
-)
-
 
 def access_control(
     func: Callable[..., Awaitable[Any]],
@@ -98,6 +79,8 @@ async def generate_response(update: Update, prompt: str) -> str:
         str: The text content of the generated response.
     """
     await update.message.reply_text("⏳ Claude 3.5 Haiku: gerando resposta... (≤1 min)")
+
+    anthropic_client = anthropic.Client(api_key=ANTHROPIC_API_KEY)
 
     try:
         response = anthropic_client.messages.create(
@@ -223,6 +206,23 @@ async def handle_pdf(update: Update, context: CallbackContext) -> None:
     await file.download_to_drive(pdf_path)
 
     await update.message.reply_text("⏳ GROBID: processando... (≤1 min)")
+
+    grobid_client = GrobidClient(
+        grobid_server="http://grobid:8070",
+        batch_size=100,
+        coordinates=[
+            "persName",
+            "figure",
+            "ref",
+            "biblStruct",
+            "formula",
+            "s",
+            "note",
+            "title",
+        ],
+        sleep_time=5,
+        timeout=60,
+    )
 
     grobid_client.process(
         "processFulltextDocument",

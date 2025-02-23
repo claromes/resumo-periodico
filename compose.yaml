@@ -1,0 +1,20 @@
+services:
+  telegram-bot:
+    build: .
+    container_name: telegram-bot
+    volumes:
+      - ./src:/app/src
+      - ./resources:/app/resources
+    depends_on:
+      - grobid
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - ALLOWED_USERS=${ALLOWED_USERS}
+    restart: always
+
+  grobid:
+    image: lfoppiano/grobid:latest-develop
+    container_name: grobid
+    ports:
+      - "8070:8070"
