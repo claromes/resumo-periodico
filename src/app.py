@@ -2,7 +2,6 @@
 
 import datetime
 import os
-import re
 from functools import wraps
 from typing import Any, Awaitable, Callable, Optional
 
@@ -53,27 +52,30 @@ def access_control(
     return wrapped
 
 
-def get_prompt(question: str, article_content: str) -> str:
+def get_prompt(question: str) -> str:
     """
     Generates a formatted prompt for an objective response based on a question and article content.
 
     Args:
         question (str): The question asked by the user.
-        article_content (str): The content extracted from the article.
 
     Returns:
         str: The formatted string containing the question and article content.
     """
-    return f"O usuário fez a seguinte pergunta baseada no artigo:\n\n'{question}'\n\nTexto extraído do artigo:\n\n{article_content}\n\nResponda de forma objetiva, em português (PT-BR) e limite-se a 850 tokens."
+    return f"Pergunta baseada no XML (artigo científico estruturado em XML/TEI) em anexo:\n\n'{question}'\n\nResponda de forma objetiva e em português (PT-BR)."
 
 
-async def generate_response(update: Update, prompt: str) -> str:
+async def generate_response(
+    update: Update, context: CallbackContext, prompt: str, article: str
+) -> str:
     """
     Generates a response using the Claude 3.5 Haiku model based on the provided prompt.
 
     Args:
         update (Update): The update object representing the incoming message and its context.
+        context (CallbackContext): The context object containing user-specific data, including the article content.
         prompt (str): The prompt to be sent to the Claude model to generate a response.
+        article (str): The content extracted from the article.
 
     Returns:
         str: The text content of the generated response.
@@ -84,9 +86,24 @@ async def generate_response(update: Update, prompt: str) -> str:
 
     try:
         response = anthropic_client.messages.create(
-            max_tokens=850,
+            max_tokens=1024,
             model="claude-3-5-haiku-20241022",
-            messages=[{"role": "user", "content": prompt}],
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {
+                            "type": "document",
+                            "source": {
+                                "type": "text",
+                                "media_type": "text/plain",
+                                "data": article,
+                            },
+                        },
+                    ],
+                }
+            ],
         )
 
         await update.message.chat.send_action(action="typing")
@@ -110,7 +127,7 @@ async def generate_summary(update: Update, context: CallbackContext) -> None:
     """
     article_content: Optional[str] = context.user_data.get("article")
     question: str = (
-        """Responda aos seguintes tópicos: Título ('Título'), Data de publicação ('Data de publicação'), Autores ('Autores'), Resumo em um tweet ('Resumo em um tweet'), Panorama ('Panorama') e Principais achados ('Principais achados'). A resposta deve estar em português (PT-BR), baseada no artigo e com um máximo de 850 tokens."""
+        """Pergunta baseada no XML (artigo científico estruturado em XML/TEI) em anexo:\n\nResponda aos seguintes tópicos: Título, Data de publicação, Autores, Resumo em um tweet, Panorama e Principais achados. A resposta deve estar em português (PT-BR)."""
     )
 
     if not article_content:
@@ -119,16 +136,15 @@ async def generate_summary(update: Update, context: CallbackContext) -> None:
         )
         return
 
-    prompt: str = get_prompt(question, article_content)
+    prompt: str = get_prompt(question)
 
-    summary_text: str = await generate_response(update, prompt)
-    summary_text_clean: str = re.sub(
-        r"<\?xml.*?</TEI>", "", summary_text, flags=re.DOTALL
+    summary_text: str = await generate_response(
+        update, context, prompt, article_content
     )
 
-    context.user_data["summary"] = summary_text_clean
+    context.user_data["summary"] = summary_text
 
-    await update.message.reply_text(f"Resumo:\n\n{summary_text_clean}")
+    await update.message.reply_text(f"Resumo:\n\n{summary_text}")
     await update.message.reply_text("Se preferir, pergunte algo sobre o artigo.")
 
 
@@ -272,8 +288,8 @@ async def handle_text(update: Update, context: CallbackContext) -> None:
         await update.message.reply_text("Envie um artigo para análise.")
         return
 
-    prompt: str = get_prompt(user_message, article_content)
-    answer: str = await generate_response(update, prompt)
+    prompt: str = get_prompt(user_message)
+    answer: str = await generate_response(update, context, prompt, article_content)
 
     await update.message.reply_text(answer)
 
