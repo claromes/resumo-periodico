@@ -8,7 +8,7 @@ services:
     depends_on:
       - grobid
     environment:
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - ALLOWED_USERS=${ALLOWED_USERS}
     restart: always

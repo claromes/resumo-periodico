@@ -1,8 +1,6 @@
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from utils import escape_markdown_v2
-
 
 async def start(update: Update, context: CallbackContext) -> None:
     """
@@ -34,10 +32,9 @@ async def suporte(update: Update, context: CallbackContext) -> None:
         None
     """
     await update.message.reply_text(
-        escape_markdown_v2(
-            """Ferramenta experimental para gerar resumos de artigos científicos diretamente de arquivos PDF. Foi desenvolvida para auxiliar no processo de curadoria da newsletter Periódica.
+        """Ferramenta experimental para gerar resumos de artigos científicos diretamente de arquivos PDF\. Foi desenvolvida para auxiliar no processo de curadoria da newsletter Periódica\.
 
-O modelo de linguagem GPT-4o mini é utilizado em conjunto com a biblioteca de aprendizado de máquina GROBID, responsável pela extração de informações acadêmicas dos artigos.
+O modelo de linguagem GPT\-4o mini é utilizado em conjunto com a biblioteca de aprendizado de máquina GROBID, responsável pela extração de informações acadêmicas dos artigos\.
 
 Comandos:
 /resumo: gerar resumo do artigo em PDF
@@ -45,14 +42,13 @@ Comandos:
 /start: iniciar uma nova conversa
 
 Reporte um erro:
-abra uma issue no [GitHub](https://github.com/periodicanews/resumo-periodico/issues) ou envie um e-mail para support@claromes.com.
+abra uma issue no [GitHub](https://github\.com/periodicanews/resumo\-periodico/issues) ou envie um e\-mail para support@claromes\.com\.
 
 Créditos:
-author: Clarissa Mendes <support@claromes.com>
-version: 0.0.2-alpha
-license:
-source code: [github.com/periodicanews/resumo-periodico](https://github.com/periodicanews/resumo-periodico)
-"""
-        ),
+author: Clarissa Mendes <\support@claromes\.com\>
+version: 0\.1\.0\-alpha
+license: [GPL\-3\.0](https://raw\.githubusercontent\.com/periodicanews/resumo\-periodico/refs/heads/main/LICENSE)
+source code: [github\.com/periodicanews/resumo\-periodico](https://github\.com/periodicanews/resumo\-periodico)
+""",
         parse_mode="MarkdownV2",
     )
