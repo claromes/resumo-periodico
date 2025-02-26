@@ -31,7 +31,7 @@ async def handle_pdf(update: Update, context: CallbackContext) -> None:
     await update.message.reply_text("⏳ GROBID: processando... (≤1 min)")
 
     grobid_client = GrobidClient(
-        grobid_server="http://localhost:8070",
+        grobid_server="http://grobid:8070",
         coordinates=[
             "ref",
             "biblStruct",
