@@ -3,3 +3,4 @@
 *.pdf
 note.txt
 /resources
+__pycache__/
