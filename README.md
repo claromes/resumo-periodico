@@ -2,13 +2,13 @@
 
 Ferramenta experimental desenvolvida para gerar resumos de artigos científicos diretamente de arquivos PDF. Esses resumos são aproveitados no processo de curadoria da [newsletter Periódica](https://periodica.substack.com/).
 
-O modelo de linguagem GPT-4o mini é utilizado em conjunto com a biblioteca de aprendizado de máquina GROBID, responsável pela extração de informações acadêmicas dos artigos.
+O modelo de linguagem `GPT-4o mini` é utilizado em conjunto com a biblioteca de aprendizado de máquina GROBID, responsável pela extração de informações acadêmicas dos artigos.
 
 # Metodologia
 
 A aplicação é desenvolvida em Python (v3.11.11).
 
-O bot do Telegram é executado em um contêiner Docker e intermedia a comunicação com a API da OpenAI para gerar respostas por meio do modelo `GPT-4o mini`.
+O bot do Telegram é executado em um contêiner Docker e intermedia a comunicação com a API da OpenAI para gerar respostas.
 
 O back-end executa uma imagem do GROBID, com apenas modelos CRF, utilizados para segmentação e estruturação de documentos acadêmicos em elementos semânticos, como título, autores, afiliações, referências bibliográficas, etc. A [documentação do GROBID](https://grobid.readthedocs.io/en/latest/Grobid-docker/) também disponibiliza a versão completa (10GB), porém, para esta etapa experimental, usamos a [versão leve](https://hub.docker.com/r/lfoppiano/grobid/) (300MB).
 
