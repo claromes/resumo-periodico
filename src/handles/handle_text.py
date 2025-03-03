@@ -16,7 +16,7 @@ def get_prompt(question: str) -> str:
     Returns:
         str: The formatted string containing the question and article content.
     """
-    return f"Pergunta baseada no artigo em anexo, estruturado em XML:\n\n'{question}'\n\nResponda de forma objetiva, em português (PT-BR) e em plain text, porém, ao referenciar trechos de textos, mantenha o idioma original."
+    return f"Pergunta baseada no artigo em anexo, estruturado em JSON:\n\n'{question}'\n\nResponda de forma objetiva, em português (PT-BR) e em plain text, porém, ao referenciar trechos de textos, mantenha o idioma original."
 
 
 async def handle_text(update: Update, context: CallbackContext) -> None:

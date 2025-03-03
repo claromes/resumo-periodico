@@ -40,8 +40,8 @@ async def generate_response(
 
         openai_assistant = openai_client.beta.assistants.create(
             model="gpt-4o-mini",
-            name="TEI/XML Scientific Article Assistant",
-            instructions="You are an assistant specialized in scientific articles in TEI/XML format. Use the content of the uploaded files to answer the user's questions.",
+            name="JSON Scientific Article Assistant",
+            instructions="You are an assistant specialized in scientific articles in JSON format. Use the content of the uploaded files to answer the user's questions.",
             tools=[{"type": "file_search"}],
         )
 
@@ -88,7 +88,7 @@ async def generate_summary(update: Update, context: CallbackContext) -> None:
     """
     article_path: Optional[str] = context.user_data.get("article")
     question: str = (
-        """Pergunta baseada no artigo em anexo, estruturado em XML:\n\nResponda aos seguintes tópicos: no bloco <teiHeader>: "Título" (bloco <titleStmt>), "Data de publicação", "Autores" e "Publisher"; no bloco <body>: "Resumo em um tweet", "Panorama" e "Principais achados"; no bloco listBibl, considerar cada bloco biblStruct como 1 referência: "Total estimado de referências". A resposta deve estar em português (PT-BR), porém, ao referenciar trechos de textos, mantenha o idioma original. Não indicar o bloco, somente o tópico, na resposta e em plain text."""
+        """Pergunta baseada no artigo em anexo, estruturado em XML:\n\nResponda aos seguintes tópicos: no bloco teiHeader: "Título" (bloco titleStmt), "Data de publicação", "Autores" e "Publisher"; no bloco body: "Resumo em um tweet", "Panorama" e "Principais achados"; no bloco listBibl, considerar cada bloco biblStruct como 1 referência: "Total estimado de referências". A resposta deve estar em português (PT-BR), porém, ao referenciar trechos de textos, mantenha o idioma original. Não indicar o bloco, somente o tópico, na resposta e em plain text."""
     )
 
     if not article_path:

@@ -1,10 +1,33 @@
 import datetime
 import os
-import shutil
 
 from grobid_client.grobid_client import GrobidClient
 from telegram import Document, Update
 from telegram.ext import CallbackContext
+
+import xmltodict
+import json
+
+
+def tei_to_json(tei_file_path: str, json_file_path: str) -> str:
+    """Converts a TEI-XML file to JSON and saves the result to a file.
+
+    Args:
+        tei_file_path (str): Path to the input TEI-XML file.
+        json_file_path (str): Path where the JSON file will be saved.
+
+    Returns:
+        str: Path to the generated JSON file.
+    """
+    with open(tei_file_path, "r", encoding="utf-8") as tei_file:
+        tei_content: str = tei_file.read()
+
+    tei_dict: dict = xmltodict.parse(tei_content)
+
+    with open(json_file_path, "w", encoding="utf-8") as json_file:
+        json.dump(tei_dict, json_file, indent=4, ensure_ascii=False)
+
+    return json_file_path
 
 
 async def handle_pdf(update: Update, context: CallbackContext) -> None:
@@ -73,10 +96,12 @@ async def handle_pdf(update: Update, context: CallbackContext) -> None:
         )
         return
 
-    txt_file_path = tei_file_path.replace(".xml", ".txt")
-    shutil.copy(tei_file_path, txt_file_path)
 
-    context.user_data["article"] = txt_file_path
+    json_name: str = document.file_name.replace(".pdf", ".json")
+    json_file_path: str = os.path.join(input_path, json_name)
+    article_path: str = tei_to_json(tei_file_path, json_file_path)
+
+    context.user_data["article"] = article_path
 
     await update.message.reply_text(
         "Artigo processado! Envie /resumo para gerar um resumo ou faça perguntas."
