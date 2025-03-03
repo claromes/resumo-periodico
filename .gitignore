@@ -1,6 +1,7 @@
 .venv
 .env
 *.pdf
+*.json
 note.txt
 /resources
 __pycache__/

@@ -20,7 +20,6 @@ load_dotenv()
 
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-
 ALLOWED_USERS = os.getenv("ALLOWED_USERS")
 
 
