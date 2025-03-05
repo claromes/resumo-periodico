@@ -6,8 +6,9 @@ O modelo de linguagem `GPT-4o mini` é utilizado em conjunto com a biblioteca de
 
 # Funcionalidades
 
-- Resumo via comando (`/resumo`)
-- Controle de acesso ao chatbot via nome de usuário
+- resumo via comando (`/resumo`)
+- somente um arquivo PDF por resumo
+- controle de acesso ao chatbot via nome de usuário
 
 # Metodologia
 
@@ -45,6 +46,9 @@ O [BotFather](https://core.telegram.org/bots/features#botfather) é o serviço p
 
 > [!WARNING]
 > Por conta de recursos limitados durante os testes, os containers são reiniciados automaticamente. Para alterar essa configuração, edite o parâmetro `mem_limit` no arquivo compose.yaml.
+
+> [NOTE]
+> Mínimo 4GiB de RAM, ideal 8GiB
 
 ```
 docker-compose up -d
