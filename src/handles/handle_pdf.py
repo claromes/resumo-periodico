@@ -1,12 +1,11 @@
 import datetime
+import json
 import os
 
+import xmltodict
 from grobid_client.grobid_client import GrobidClient
 from telegram import Document, Update
 from telegram.ext import CallbackContext
-
-import xmltodict
-import json
 
 
 def tei_to_json(tei_file_path: str, json_file_path: str) -> str:
@@ -53,37 +52,41 @@ async def handle_pdf(update: Update, context: CallbackContext) -> None:
 
     await update.message.reply_text("⏳ GROBID: processando... (≤1 min)")
 
-    grobid_client = GrobidClient(
-        grobid_server="http://grobid:8070",
-        coordinates=[
-            "ref",
-            "biblStruct",
-            "persName",
-            "figure",
-            "formula",
-            "head",
-            "s",
-            "p",
-            "note",
-            "title",
-            "affiliation",
-        ],
-        sleep_time=5,
-        timeout=60,
-    )
+    try:
+        grobid_client = GrobidClient(
+            grobid_server="http://grobid:8070",
+            coordinates=[
+                "ref",
+                "biblStruct",
+                "persName",
+                "figure",
+                "formula",
+                "head",
+                "s",
+                "p",
+                "note",
+                "title",
+                "affiliation",
+            ],
+            sleep_time=5,
+            timeout=60,
+        )
 
-    grobid_client.process(
-        "processFulltextDocument",
-        input_path,
-        consolidate_header=True,
-        consolidate_citations=True,
-        include_raw_citations=True,
-        include_raw_affiliations=True,
-        tei_coordinates=False,
-        segment_sentences=True,
-        force=True,
-        verbose=True,
-    )
+        grobid_client.process(
+            "processFulltextDocument",
+            input_path,
+            consolidate_header=True,
+            consolidate_citations=True,
+            include_raw_citations=True,
+            include_raw_affiliations=True,
+            tei_coordinates=False,
+            segment_sentences=True,
+            force=True,
+            verbose=True,
+        )
+    except Exception as e:
+        await update.message.reply_text(f"Verifique o servidor do GROBID.\nErro: {e}")
+        return str(e)
 
     await update.message.chat.send_action(action="typing")
 

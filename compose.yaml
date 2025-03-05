@@ -18,3 +18,5 @@ services:
     container_name: grobid
     ports:
       - "8070:8070"
+    mem_limit: 7g
+    restart: always
