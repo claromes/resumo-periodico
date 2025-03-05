@@ -44,9 +44,7 @@ O [BotFather](https://core.telegram.org/bots/features#botfather) é o serviço p
 # Instalação
 
 > [!WARNING]
-> Por conta de recursos limitados durante os testes, o container é reiniciado automaticamente quando a memória ultrapassa 7GB.
->
-> Para alterar essa configuração, edite o parâmetro `mem_limit` no arquivo compose.yaml.
+> Por conta de recursos limitados durante os testes, os containers são reiniciados automaticamente. Para alterar essa configuração, edite o parâmetro `mem_limit` no arquivo compose.yaml.
 
 ```
 docker-compose up -d
