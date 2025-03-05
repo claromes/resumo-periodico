@@ -1,6 +1,9 @@
 from telegram import Update
 from telegram.ext import CallbackContext
 
+from utils import escape_markdown_v2
+from version import __version__
+
 
 async def start(update: Update, context: CallbackContext) -> None:
     """
@@ -32,7 +35,7 @@ async def suporte(update: Update, context: CallbackContext) -> None:
         None
     """
     await update.message.reply_text(
-        """Ferramenta experimental para gerar resumos de artigos científicos diretamente de arquivos PDF\. Foi desenvolvida para auxiliar no processo de curadoria da newsletter Periódica\.
+        f"""Ferramenta experimental para gerar resumos de artigos científicos diretamente de arquivos PDF\. Foi desenvolvida para auxiliar no processo de curadoria da newsletter Periódica\.
 
 O modelo de linguagem GPT\-4o mini é utilizado em conjunto com a biblioteca de aprendizado de máquina GROBID, responsável pela extração de informações acadêmicas dos artigos\.
 
@@ -46,7 +49,7 @@ abra uma issue no [GitHub](https://github\.com/claromes/resumo\-periodico/issues
 
 Créditos:
 author: Clarissa Mendes <\support@claromes\.com\>
-version: 0\.1\.0\-alpha
+version: {escape_markdown_v2(__version__)}
 license: [GPL\-3\.0](https://raw\.githubusercontent\.com/claromes/resumo\-periodico/refs/heads/main/LICENSE)
 source code: [github\.com/claromes/resumo\-periodico](https://github\.com/claromes/resumo\-periodico)
 """,
