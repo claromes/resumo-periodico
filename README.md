@@ -47,7 +47,7 @@ O [BotFather](https://core.telegram.org/bots/features#botfather) é o serviço p
 > [!WARNING]
 > Por conta de recursos limitados durante os testes, os containers são reiniciados automaticamente. Para alterar essa configuração, edite o parâmetro `mem_limit` no arquivo compose.yaml.
 
-> [NOTE]
+> [!NOTE]
 > Mínimo 4GiB de RAM, ideal 8GiB
 
 ```
