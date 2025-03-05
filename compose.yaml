@@ -11,6 +11,7 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - ALLOWED_USERS=${ALLOWED_USERS}
+    mem_limit: 1g
     restart: always
 
   grobid:
@@ -18,3 +19,5 @@ services:
     container_name: grobid
     ports:
       - "8070:8070"
+    mem_limit: 6g
+    restart: always
