@@ -6,7 +6,7 @@ O modelo de linguagem `GPT-4o mini` é utilizado em conjunto com a biblioteca de
 
 # Metodologia
 
-A aplicação é desenvolvida em Python (v3.11.11).
+A aplicação é desenvolvida em Python.
 
 O bot do Telegram é executado em um contêiner Docker e intermedia a comunicação com a API da OpenAI para gerar respostas.
 
@@ -17,3 +17,31 @@ O GROBID é uma biblioteca de aprendizado de máquina para extração, parsing e
 A integração entre o GROBID e a API da OpenAI ocorre pelo chatbot com o cliente Python do GROBID (v0.0.9). O usuário envia um artigo em PDF, que é enviado ao servidor para processamento. O GROBID converte o conteúdo para TEI/XML e retorna o documento reestruturado. Em seguida, o prompt e o código TEI/XML são enviados ao modelo de linguagem. A resposta gerada é retornada ao usuário.
 
 A reestruturação do artigo ocorre apenas uma vez, após o envio do documento. O servidor não mantém o histórico de prompts nem recupera arquivos processados (PDF e TEI), embora os armazene temporariamente em diretórios organizados por data e hora.
+
+# BotFather
+
+O [BotFather](https://core.telegram.org/bots/features#botfather) é o serviço principal do Telegram para o registro de bots. Use-o para criar novas contas de bot e gerenciar bots existentes.
+
+# Pré-requisitos
+
+- Python 3.11+
+- Docker Compose
+- Telegram Bot Token
+- OpenAI API Key
+- Configuração das variáveis de ambiente
+
+    ```
+    cp .example.env .env
+    ```
+
+# Instalação
+
+```
+docker compose up -d
+```
+
+# Contribuição
+
+```
+pre-commit install
+```

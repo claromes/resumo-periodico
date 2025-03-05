@@ -37,18 +37,18 @@ async def suporte(update: Update, context: CallbackContext) -> None:
 O modelo de linguagem GPT\-4o mini é utilizado em conjunto com a biblioteca de aprendizado de máquina GROBID, responsável pela extração de informações acadêmicas dos artigos\.
 
 Comandos:
+/start: iniciar uma nova conversa
 /resumo: gerar resumo do artigo em PDF
 /suporte: obter ajuda
-/start: iniciar uma nova conversa
 
 Reporte um erro:
-abra uma issue no [GitHub](https://github\.com/periodicanews/resumo\-periodico/issues) ou envie um e\-mail para support@claromes\.com\.
+abra uma issue no [GitHub](https://github\.com/claromes/resumo\-periodico/issues) ou envie um e\-mail para support@claromes\.com\.
 
 Créditos:
 author: Clarissa Mendes <\support@claromes\.com\>
 version: 0\.1\.0\-alpha
-license: [GPL\-3\.0](https://raw\.githubusercontent\.com/periodicanews/resumo\-periodico/refs/heads/main/LICENSE)
-source code: [github\.com/periodicanews/resumo\-periodico](https://github\.com/periodicanews/resumo\-periodico)
+license: [GPL\-3\.0](https://raw\.githubusercontent\.com/claromes/resumo\-periodico/refs/heads/main/LICENSE)
+source code: [github\.com/claromes/resumo\-periodico](https://github\.com/claromes/resumo\-periodico)
 """,
         parse_mode="MarkdownV2",
     )

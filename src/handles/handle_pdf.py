@@ -96,7 +96,6 @@ async def handle_pdf(update: Update, context: CallbackContext) -> None:
         )
         return
 
-
     json_name: str = document.file_name.replace(".pdf", ".json")
     json_file_path: str = os.path.join(input_path, json_name)
     article_path: str = tei_to_json(tei_file_path, json_file_path)
